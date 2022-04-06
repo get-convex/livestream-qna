@@ -1,4 +1,4 @@
-import { ConvexProvider, ConvexReactClient } from '@convex-dev/react'
+import { ConvexProvider, ConvexReactClient, OptimisticLocalStore } from '@convex-dev/react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
@@ -6,13 +6,9 @@ import { useMutation, useQuery } from '../convex/_generated'
 import styles from '../styles/Home.module.css'
 import config from "../convex.json";
 import { FormEvent, useCallback, useState } from 'react'
+import { Question } from '../convex/questions'
 
 const convex = new ConvexReactClient(config.origin)
-
-function formatCount(n: number) {
-  const className = n < 0 ? styles.negative : n == 0 ? styles.zero : styles.positive;
-  return <span className={className}>{n}</span>;
-}
 
 function QnA() {
   const questions = useQuery("questions:loadQuestions");
@@ -37,10 +33,10 @@ function QnA() {
                   {formatCount(q.votes)}
                 </td>
                 <td>
-                  <button onClick={() => upvote(q.id)}>👍</button>
+                  <button onClick={() => upvote.withOptimisticUpdate(optimisticUpdate(q, 1))(q.id)}>👍</button>
                 </td>
                 <td>
-                  <button onClick={() => downvote(q.id)}>👎</button>
+                  <button onClick={() => downvote.withOptimisticUpdate(optimisticUpdate(q, -1))(q.id)}>👎</button>
                 </td>
               </tr>
             )
@@ -74,6 +70,28 @@ function AddQuestions() {
       <button onClick={() => stopQuestions()}>No more questions.</button>
     </div>
   )
+}
+
+function formatCount(n: number) {
+  const className = n < 0 ? styles.negative : n == 0 ? styles.zero : styles.positive;
+  return <span className={className}>{n}</span>;
+}
+
+function optimisticUpdate(q: Question, increment: number) {
+  return (localStore: OptimisticLocalStore) => {
+    const questions: Question[] | undefined = localStore.getQuery("questions:loadQuestions", []);
+    if (!questions) {
+      return;
+    }
+    const newQuestions = questions.map(question => {
+      if (question.id.equals(q.id)) {
+        return {...question, votes: question.votes + increment };
+      }
+      return question;
+    });
+    newQuestions.sort((a, b) => b.votes - a.votes);
+    localStore.setQuery("questions:loadQuestions", [], newQuestions);
+  }
 }
 
 const Home: NextPage = () => {
