@@ -1,8 +1,9 @@
-import { ConvexProvider, ConvexReactClient, OptimisticLocalStore } from 'convex-dev/react'
+import { OptimisticLocalStore } from "convex-dev/browser"
+import { ConvexProvider, ConvexReactClient } from 'convex-dev/react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import { useMutation, useQuery } from '../convex/_generated'
+import { ConvexAPI, useMutation, useQuery } from '../convex/_generated'
 import styles from '../styles/Home.module.css'
 import config from "../convex.json";
 import { FormEvent, useCallback, useState } from 'react'
@@ -78,8 +79,8 @@ function formatCount(n: number) {
 }
 
 function optimisticUpdate(q: Question, increment: number) {
-  return (localStore: OptimisticLocalStore) => {
-    const questions: Question[] | undefined = localStore.getQuery("questions:loadQuestions", []);
+  return (localStore: OptimisticLocalStore<ConvexAPI>) => {
+    const questions = localStore.getQuery("questions:loadQuestions", []);
     if (!questions) {
       return;
     }
