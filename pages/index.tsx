@@ -7,7 +7,7 @@ import { ConvexAPI, useMutation, useQuery } from '../convex/_generated'
 import styles from '../styles/Home.module.css'
 import config from "../convex.json";
 import { FormEvent, useCallback, useState } from 'react'
-import { Question } from '../convex/questions'
+import { Id } from "convex-dev/values"
 
 const convex = new ConvexReactClient(config.origin)
 
@@ -16,6 +16,14 @@ function QnA() {
   const noNewQuestions = useQuery("stopQuestions:isStopped") ?? true;
   const upvote = useMutation("questions:upvote")
   const downvote = useMutation("questions:downvote");
+
+  const optimisticUpvote = upvote.withOptimisticUpdate((queryStore, id) => {
+    applyIncrement(queryStore, id, 1);
+  });
+  const optimisticDownvote = downvote.withOptimisticUpdate((queryStore, id) => {
+    applyIncrement(queryStore, id, -1);
+  });
+
   return (
     <main className={styles.main}>
       <h1 className={styles.title}>
@@ -34,10 +42,10 @@ function QnA() {
                   {formatCount(q.votes)}
                 </td>
                 <td>
-                  <button onClick={() => upvote.withOptimisticUpdate(optimisticUpdate(q, 1))(q.id)}>👍</button>
+                  <button onClick={() => optimisticUpvote(q.id)}>👍</button>
                 </td>
                 <td>
-                  <button onClick={() => downvote.withOptimisticUpdate(optimisticUpdate(q, -1))(q.id)}>👎</button>
+                  <button onClick={() => optimisticDownvote(q.id)}>👎</button>
                 </td>
               </tr>
             )
@@ -78,21 +86,19 @@ function formatCount(n: number) {
   return <span className={className}>{n}</span>;
 }
 
-function optimisticUpdate(q: Question, increment: number) {
-  return (localStore: OptimisticLocalStore<ConvexAPI>) => {
-    const questions = localStore.getQuery("questions:loadQuestions", []);
-    if (!questions) {
-      return;
-    }
-    const newQuestions = questions.map(question => {
-      if (question.id.equals(q.id)) {
-        return {...question, votes: question.votes + increment };
-      }
-      return question;
-    });
-    newQuestions.sort((a, b) => b.votes - a.votes);
-    localStore.setQuery("questions:loadQuestions", [], newQuestions);
+function applyIncrement(store: OptimisticLocalStore<ConvexAPI>, id: Id, increment: number) {
+  const questions = store.getQuery("questions:loadQuestions", []);
+  if (!questions) {
+    return;
   }
+  const newQuestions = questions.map(question => {
+    if (question.id.equals(id)) {
+      return {...question, votes: question.votes + increment };
+    }
+    return question;
+  });
+  newQuestions.sort((a, b) => b.votes - a.votes);
+  store.setQuery("questions:loadQuestions", [], newQuestions);
 }
 
 const Home: NextPage = () => {
