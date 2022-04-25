@@ -1,4 +1,4 @@
-import { Id, mutation, query } from "@convex-dev/server";
+import { Id, mutation, query } from "convex-dev/server";
 
 export type Question = {
     id: Id,

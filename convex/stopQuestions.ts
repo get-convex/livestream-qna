@@ -1,4 +1,4 @@
-import { mutation, query } from "@convex-dev/server";
+import { mutation, query } from "convex-dev/server";
 
 export const stopQuestions = mutation(async ({db}) => {
     db.insert("stream", {stopped: true});

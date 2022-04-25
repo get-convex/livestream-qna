@@ -1,4 +1,4 @@
-import { ConvexProvider, ConvexReactClient, OptimisticLocalStore } from '@convex-dev/react'
+import { ConvexProvider, ConvexReactClient, OptimisticLocalStore } from 'convex-dev/react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
