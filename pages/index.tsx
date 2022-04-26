@@ -13,9 +13,9 @@ const convex = new ConvexReactClient(config.origin)
 
 function QnA() {
   const questions = useQuery("questions:loadQuestions");
-  const noNewQuestions = useQuery("stopQuestions:isStopped") ?? true;
   const upvote = useMutation("questions:upvote")
   const downvote = useMutation("questions:downvote");
+  const noNewQuestions = useQuery("stopQuestions:isStopped") ?? true;
 
   const optimisticUpvote = upvote.withOptimisticUpdate((queryStore, id) => {
     applyIncrement(queryStore, id, 1);
@@ -81,26 +81,6 @@ function AddQuestions() {
   )
 }
 
-function formatCount(n: number) {
-  const className = n < 0 ? styles.negative : n == 0 ? styles.zero : styles.positive;
-  return <span className={className}>{n}</span>;
-}
-
-function applyIncrement(store: OptimisticLocalStore<ConvexAPI>, id: Id, increment: number) {
-  const questions = store.getQuery("questions:loadQuestions", []);
-  if (!questions) {
-    return;
-  }
-  const newQuestions = questions.map(question => {
-    if (question.id.equals(id)) {
-      return {...question, votes: question.votes + increment };
-    }
-    return question;
-  });
-  newQuestions.sort((a, b) => b.votes - a.votes);
-  store.setQuery("questions:loadQuestions", [], newQuestions);
-}
-
 const Home: NextPage = () => {
   return (
     <div className={styles.container}>
@@ -128,6 +108,26 @@ const Home: NextPage = () => {
       </footer>
     </div>
   )
+}
+
+function formatCount(n: number) {
+  const className = n < 0 ? styles.negative : n == 0 ? styles.zero : styles.positive;
+  return <span className={className}>{n}</span>;
+}
+
+function applyIncrement(store: OptimisticLocalStore<ConvexAPI>, id: Id, increment: number) {
+  const questions = store.getQuery("questions:loadQuestions", []);
+  if (!questions) {
+    return;
+  }
+  const newQuestions = questions.map(question => {
+    if (question.id.equals(id)) {
+      return {...question, votes: question.votes + increment };
+    }
+    return question;
+  });
+  newQuestions.sort((a, b) => b.votes - a.votes);
+  store.setQuery("questions:loadQuestions", [], newQuestions);
 }
 
 export default Home
