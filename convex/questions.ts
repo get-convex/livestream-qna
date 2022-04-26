@@ -37,3 +37,12 @@ export const downvote = mutation(async ({db}, id: Id) => {
     doc.votes -= 1;
     db.update(id, doc);
 })
+
+export const rollTheDice = mutation(async ({db}, id: Id) => {
+    const doc: Question | undefined = await db.get(id);
+    if (!doc) {
+        return;
+    }
+    doc.votes += Math.floor((Math.random() * 10) - 5);
+    db.update(id, doc);
+});

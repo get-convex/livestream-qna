@@ -13,9 +13,10 @@ const convex = new ConvexReactClient(config.origin)
 
 function QnA() {
   const questions = useQuery("questions:loadQuestions");
+  const noNewQuestions = useQuery("stopQuestions:isStopped") ?? true;
   const upvote = useMutation("questions:upvote")
   const downvote = useMutation("questions:downvote");
-  const noNewQuestions = useQuery("stopQuestions:isStopped") ?? true;
+  const rollTheDice = useMutation("questions:rollTheDice");
 
   const optimisticUpvote = upvote.withOptimisticUpdate((queryStore, id) => {
     applyIncrement(queryStore, id, 1);
@@ -46,6 +47,9 @@ function QnA() {
                 </td>
                 <td>
                   <button onClick={() => optimisticDownvote(q.id)}>👎</button>
+                </td>
+                <td>
+                  <button onClick={() => rollTheDice(q.id)}>🎲</button>
                 </td>
               </tr>
             )
