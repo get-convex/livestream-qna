@@ -1,13 +1,13 @@
-import { OptimisticLocalStore } from "convex-dev/browser"
-import { ConvexProvider, ConvexReactClient } from 'convex-dev/react'
+import { OptimisticLocalStore } from "convex/browser"
+import { ConvexProvider, ConvexReactClient } from 'convex/react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import { ConvexAPI, useMutation, useQuery } from '../convex/_generated'
+import { ConvexAPI, useMutation, useQuery } from '../convex/_generated/react'
 import styles from '../styles/Home.module.css'
 import config from "../convex.json";
 import { FormEvent, useCallback, useState } from 'react'
-import { Id } from "convex-dev/values"
+import { Id } from "convex/values"
 
 const convex = new ConvexReactClient(config.origin)
 

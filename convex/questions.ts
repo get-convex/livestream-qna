@@ -1,5 +1,5 @@
-import { mutation, query } from "convex-dev/server";
-import { Id } from "convex-dev/values";
+import { Id } from "convex/values";
+import { query, mutation } from "./_generated/server";
 
 export type Question = {
     id: Id,
@@ -26,7 +26,7 @@ export const upvote = mutation(async ({db}, id: Id) => {
         return;
     }
     doc.votes += 1;
-    db.update(id, doc);
+    db.replace(id, doc);
 })
 
 export const downvote = mutation(async ({db}, id: Id) => {
@@ -35,7 +35,7 @@ export const downvote = mutation(async ({db}, id: Id) => {
         return;
     }
     doc.votes -= 1;
-    db.update(id, doc);
+    db.replace(id, doc);
 })
 
 export const rollTheDice = mutation(async ({db}, id: Id) => {
@@ -44,5 +44,5 @@ export const rollTheDice = mutation(async ({db}, id: Id) => {
         return;
     }
     doc.votes += Math.floor((Math.random() * 10) - 5);
-    db.update(id, doc);
+    db.replace(id, doc);
 });
